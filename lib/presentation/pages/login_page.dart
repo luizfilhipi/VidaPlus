@@ -36,7 +36,7 @@ class LoginPage extends StatelessWidget {
                   onPressed: () {
                     Get.to(() => RegisterPage(controller: controller));
                     },
-                  child: const Text('Registrar'),
+                  child: const Text('Criar minha Conta'),
                 ),
                 Obx(() => Text(controller.error.value, style: const TextStyle(color: Colors.red)
                 )),
