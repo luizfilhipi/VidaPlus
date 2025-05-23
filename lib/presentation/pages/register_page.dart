@@ -21,6 +21,7 @@ class RegisterPage extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   TextField(controller: emailController, decoration: const InputDecoration(labelText: 'Email')),
+                  const SizedBox(height: 8),
                   TextField(controller: passwordController, decoration: const InputDecoration(labelText: 'Senha'), obscureText: true),
                   const SizedBox(height: 16),
                   Obx(() => controller.isLoading.value

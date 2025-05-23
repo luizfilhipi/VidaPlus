@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter_vidaplus/core/theme/app_themes.dart';
 import 'firebase_options.dart';
 import 'package:get/get.dart';
 import 'data/datasources/firebase_auth_datasource.dart';
@@ -30,9 +31,9 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return GetMaterialApp(
       title: 'Vida+',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-      ),
+      theme: AppTheme.light,
+      darkTheme: AppTheme.dark,
+      themeMode: ThemeMode.system, // Alterna conforme o SO
       home: LoginPage(controller: controller),
     );
   }
