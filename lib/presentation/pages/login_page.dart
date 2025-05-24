@@ -18,6 +18,7 @@ class _LoginPageState extends State<LoginPage> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _isPasswordVisible = false;
+  bool _autoValidate = false;
 
   @override
   void dispose() {
@@ -26,27 +27,10 @@ class _LoginPageState extends State<LoginPage> {
     super.dispose();
   }
 
-  String? _validateEmail(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Por favor, insira seu email';
-    }
-    if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
-      return 'Por favor, insira um email válido';
-    }
-    return null;
-  }
-
-  String? _validatePassword(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Por favor, insira sua senha';
-    }
-    if (value.length < 6) {
-      return 'A senha deve ter pelo menos 6 caracteres';
-    }
-    return null;
-  }
-
   void _handleLogin() async {
+    setState(() {
+      _autoValidate = true;
+    });
     if (_formKey.currentState!.validate()) {
       await widget.controller.login(
         _emailController.text,
@@ -89,7 +73,13 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                     keyboardType: TextInputType.emailAddress,
                     textInputAction: TextInputAction.next,
-                    validator: _validateEmail,
+                    autovalidateMode: _autoValidate 
+                        ? AutovalidateMode.onUserInteraction 
+                        : AutovalidateMode.disabled,
+                    onChanged: (_) {
+                      if (_autoValidate) _formKey.currentState?.validate();
+                    },
+                    validator: (value) => widget.controller.validateEmail(value),
                     autofillHints: const [AutofillHints.email],
                   ),
                   const SizedBox(height: 16),                  TextFormField(
@@ -114,7 +104,7 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                     ),
                     obscureText: !_isPasswordVisible,
-                    validator: _validatePassword,
+                    validator: (value) => widget.controller.validatePassword(value),
                     textInputAction: TextInputAction.done,
                     onFieldSubmitted: (_) => _handleLogin(),
                     autofillHints: const [AutofillHints.password],

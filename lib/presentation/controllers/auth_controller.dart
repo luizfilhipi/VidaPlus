@@ -1,23 +1,33 @@
 import 'package:get/get.dart';
 import '../../domain/entities/user_entity.dart';
 import '../../domain/repositories/auth_repository.dart';
+import '../../domain/usecases/auth_usecases.dart';
+import '../../domain/usecases/validators.dart';
 
 class AuthController extends GetxController {
   final AuthRepository authRepository;
+  late final SignInUseCase _signInUseCase;
+  late final SignUpUseCase _signUpUseCase;
 
-  AuthController(this.authRepository);
+  AuthController(this.authRepository) {
+    _signInUseCase = SignInUseCase(authRepository);
+    _signUpUseCase = SignUpUseCase(authRepository);
+  }
 
   var user = Rxn<UserEntity>();
   var isLoading = false.obs;
   var error = ''.obs;
 
+  String? validateEmail(String? value) => EmailValidator.validate(value);
+  String? validatePassword(String? value) => PasswordValidator.validate(value);
+
   Future<void> login(String email, String password) async {
     try {
       error.value = '';
       isLoading.value = true;
-      user.value = await authRepository.login(email, password);
+      user.value = await _signInUseCase.execute(email, password);
     } catch (e) {
-      error.value = 'Erro ao fazer login';
+      error.value = e is ValidationException ? e.message : 'Erro ao fazer login';
     } finally {
       isLoading.value = false;
     }
@@ -27,9 +37,9 @@ class AuthController extends GetxController {
     try {
       error.value = '';
       isLoading.value = true;
-      user.value = await authRepository.register(email, password);
+      user.value = await _signUpUseCase.execute(email, password);
     } catch (e) {
-      error.value = 'Erro ao registrar';
+      error.value = e is ValidationException ? e.message : 'Erro ao registrar';
     } finally {
       isLoading.value = false;
     }
