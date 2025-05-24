@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_vidaplus/core/errors/app_exceptions.dart';
 
 enum HabitFrequency {
   daily,
@@ -69,14 +70,4 @@ class HabitEntity extends Equatable {
     recommendedTime,
     createdAt,
   ];
-}
-
-class ValidationException implements Exception {
-  final String message;
-  ValidationException(this.message);
-
-  @override
-  String toString() {
-    return 'ValidationException: $message';
-  }
 }

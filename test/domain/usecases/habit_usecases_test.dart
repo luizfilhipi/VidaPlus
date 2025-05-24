@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_vidaplus/domain/entities/habit_entity.dart';
 import 'package:flutter_vidaplus/domain/repositories/habit_repository.dart';
 import 'package:flutter_vidaplus/domain/usecases/habit_usecases.dart';
+import 'habit_usecases_test.mocks.dart';
 
 @GenerateMocks([HabitRepository])
 void main() {
