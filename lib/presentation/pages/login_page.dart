@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../controllers/auth_controller.dart';
+import '../controllers/habit_controller.dart';
 import './register_page.dart';
+import './add_habit_page.dart';
 
 class LoginPage extends StatefulWidget {
   final AuthController controller;
@@ -25,17 +27,20 @@ class _LoginPageState extends State<LoginPage> {
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
-  }
-
-  void _handleLogin() async {
+  }  void _handleLogin() async {
     setState(() {
       _autoValidate = true;
     });
     if (_formKey.currentState!.validate()) {
-      await widget.controller.login(
+      final bool success = await widget.controller.login(
         _emailController.text,
         _passwordController.text,
       );
+      
+      if (success && mounted && widget.controller.user.value != null) {
+        // Navigate to AddHabitPage after successful login
+        Get.off(() => const AddHabitPage());
+      }
     }
   }
 

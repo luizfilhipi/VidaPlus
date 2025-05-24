@@ -4,6 +4,7 @@ import 'package:flutter_vidaplus/presentation/controllers/auth_controller.dart';
 import 'package:get/get.dart';
 import './firebase_options.dart';
 import './presentation/bindings/auth_bindings.dart';
+import './presentation/bindings/habit_bindings.dart';
 import './presentation/pages/login_page.dart';
 
 void main() async {
@@ -17,8 +18,13 @@ void main() async {
 }
 
 Future<void> initializeDependencies() async {
-  final bindings = AuthBindings();
-  bindings.dependencies();
+  // Initialize Auth dependencies
+  final authBindings = AuthBindings();
+  authBindings.dependencies();
+  
+  // Initialize Habit dependencies
+  final habitBindings = HabitBindings();
+  habitBindings.dependencies();
 }
 
 class MyApp extends StatelessWidget {

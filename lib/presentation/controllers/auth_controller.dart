@@ -20,14 +20,15 @@ class AuthController extends GetxController {
 
   String? validateEmail(String? value) => EmailValidator.validate(value);
   String? validatePassword(String? value) => PasswordValidator.validate(value);
-
-  Future<void> login(String email, String password) async {
+  Future<bool> login(String email, String password) async {
     try {
       error.value = '';
       isLoading.value = true;
       user.value = await _signInUseCase.execute(email, password);
+      return true; // Login successful
     } catch (e) {
       error.value = e is ValidationException ? e.message : 'Erro ao fazer login';
+      return false; // Login failed
     } finally {
       isLoading.value = false;
     }
