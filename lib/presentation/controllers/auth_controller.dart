@@ -1,20 +1,26 @@
 import 'package:get/get.dart';
 import '../../domain/entities/user_entity.dart';
-import '../../domain/repositories/auth_repository.dart';
-import '../../domain/usecases/auth_usecases.dart';
+import '../../core/errors/validation_exception.dart';
 import '../../domain/usecases/validators.dart';
+import '../../core/services/auth_service.dart';
+import '../routes/app_routes.dart';
 
 class AuthController extends GetxController {
-  final AuthRepository authRepository;
-  late final SignInUseCase _signInUseCase;
-  late final SignUpUseCase _signUpUseCase;
+  final AuthService _authService;
+  final Rx<UserEntity?> user = Rx<UserEntity?>(null);
 
-  AuthController(this.authRepository) {
-    _signInUseCase = SignInUseCase(authRepository);
-    _signUpUseCase = SignUpUseCase(authRepository);
+  AuthController(this._authService) {
+    // Check initial auth state
+    _authService.authStateChanges().listen((user) {
+      this.user.value = user;
+      if (user != null) {
+        Get.offAllNamed(AppRoutes.habits); // Redireciona para a página de tracking após login
+      } else {
+        Get.offAllNamed(AppRoutes.login);
+      }
+    });
   }
 
-  var user = Rxn<UserEntity>();
   var isLoading = false.obs;
   var error = ''.obs;
 
@@ -22,13 +28,31 @@ class AuthController extends GetxController {
   String? validatePassword(String? value) => PasswordValidator.validate(value);
   Future<bool> login(String email, String password) async {
     try {
-      error.value = '';
       isLoading.value = true;
-      user.value = await _signInUseCase.execute(email, password);
-      return true; // Login successful
+      error.value = '';
+
+      if (email.isEmpty || password.isEmpty) {
+        error.value = 'Email e senha são obrigatórios';
+        return false;
+      }
+
+      final emailError = validateEmail(email);
+      if (emailError != null) {
+        error.value = emailError;
+        return false;
+      }
+
+      final passwordError = validatePassword(password);
+      if (passwordError != null) {
+        error.value = passwordError;
+        return false;
+      }
+
+      user.value = await _authService.signIn(email, password);
+      return true;
     } catch (e) {
       error.value = e is ValidationException ? e.message : 'Erro ao fazer login';
-      return false; // Login failed
+      return false;
     } finally {
       isLoading.value = false;
     }
@@ -38,7 +62,7 @@ class AuthController extends GetxController {
     try {
       error.value = '';
       isLoading.value = true;
-      user.value = await _signUpUseCase.execute(email, password);
+      user.value = await _authService.signUp(email, password);
     } catch (e) {
       error.value = e is ValidationException ? e.message : 'Erro ao registrar';
     } finally {
@@ -50,7 +74,7 @@ class AuthController extends GetxController {
     try {
       error.value = '';
       isLoading.value = true;
-      await authRepository.logout();
+      await _authService.logout();
       user.value = null;
     } catch (e) {
       error.value = 'Erro ao fazer logout';
@@ -67,7 +91,7 @@ class AuthController extends GetxController {
 
   Future<void> _checkCurrentUser() async {
     try {
-      user.value = await authRepository.getCurrentUser();
+      user.value = await _authService.getCurrentUser();
     } catch (e) {
       print('Error checking current user: $e');
     }

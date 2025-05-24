@@ -1,40 +1,44 @@
 import 'package:get/get.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter_vidaplus/data/datasources/habit_datasource.dart';
-import 'package:flutter_vidaplus/data/repositories_impl/habit_repository_impl.dart';
-import 'package:flutter_vidaplus/domain/usecases/habit_usecases.dart';
-import 'package:flutter_vidaplus/presentation/controllers/habit_controller.dart';
+import '../../data/datasources/habit_datasource.dart';
+import '../../data/repositories_impl/habit_repository_impl.dart';
+import '../../domain/repositories/habit_repository.dart';
+import '../../domain/usecases/habit_usecases.dart';
+import '../controllers/habit_controller.dart';
 
 class HabitBindings extends Bindings {
   @override
   void dependencies() {
+    // Firestore instance
+    Get.lazyPut(() => FirebaseFirestore.instance);
+
     // DataSource
     Get.lazyPut<HabitRemoteDataSource>(
-      () => FirebaseHabitDataSource(firestore: FirebaseFirestore.instance),
+      () => FirebaseHabitDataSource(firestore: Get.find<FirebaseFirestore>()),
     );
 
     // Repository
-    Get.lazyPut(
+    Get.lazyPut<HabitRepository>(
       () => HabitRepositoryImpl(Get.find<HabitRemoteDataSource>()),
     );
 
     // UseCases
     Get.lazyPut(
-      () => AddHabitUseCase(Get.find<HabitRepositoryImpl>()),
+      () => GetHabitsUseCase(Get.find<HabitRepository>()),
     );
     Get.lazyPut(
-      () => GetHabitsUseCase(Get.find<HabitRepositoryImpl>()),
+      () => UpdateHabitUseCase(Get.find<HabitRepository>()),
     );
     Get.lazyPut(
-      () => UpdateHabitUseCase(Get.find<HabitRepositoryImpl>()),
+      () => AddHabitUseCase(Get.find<HabitRepository>()),
     );
 
     // Controller
     Get.lazyPut(
       () => HabitController(
-        addHabitUseCase: Get.find<AddHabitUseCase>(),
-        getHabitsUseCase: Get.find<GetHabitsUseCase>(),
-        updateHabitUseCase: Get.find<UpdateHabitUseCase>(),
+        getHabitsUseCase: Get.find(),
+        updateHabitUseCase: Get.find(),
+        addHabitUseCase: Get.find(),
       ),
     );
   }

@@ -1,19 +1,18 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get/get.dart';
-import '../../data/repositories_impl/firebase_auth_repository.dart';
-import '../../domain/repositories/auth_repository.dart';
+import '../../core/services/auth_service.dart';
 import '../controllers/auth_controller.dart';
 
 class AuthBindings extends Bindings {
   @override
   void dependencies() {
-    Get.put<AuthRepository>(
-      FirebaseAuthRepository(),
-      permanent: true,
-    );
+    // Injetando o FirebaseAuth
+    Get.lazyPut(() => FirebaseAuth.instance);
 
-    Get.put<AuthController>(
-      AuthController(Get.find<AuthRepository>()),
-      permanent: true,
-    );
+    // Injetando o AuthService com a dependência do FirebaseAuth
+    Get.lazyPut(() => AuthService(Get.find<FirebaseAuth>()));
+
+    // Injetando o AuthController com a dependência do AuthService
+    Get.lazyPut(() => AuthController(Get.find<AuthService>()));
   }
 }

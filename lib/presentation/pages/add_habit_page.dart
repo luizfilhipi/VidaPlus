@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_vidaplus/presentation/controllers/habit_controller.dart';
 import 'package:flutter_vidaplus/presentation/widgets/habit_form_widget.dart';
+import '../../domain/entities/habit_entity.dart';
 
 class AddHabitPage extends GetView<HabitController> {
   const AddHabitPage({Key? key}) : super(key: key);
@@ -10,38 +11,157 @@ class AddHabitPage extends GetView<HabitController> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Adicione um Novo Habito'),
-        centerTitle: true,
+        title: const Text('Adicionar Hábito'),
       ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Header
-                const Text(
-                  'Cria um Novo Habito',
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                  ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: Form(
+          key: controller.formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              TextFormField(
+                controller: controller.nameController,
+                decoration: const InputDecoration(
+                  labelText: 'Nome do Hábito',
+                  border: OutlineInputBorder(),
                 ),
-                const SizedBox(height: 8),
-                const Text(
-                  'Crie melhores hábitos monitorando-os diariamente ou semanalmente',
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.grey,
-                  ),
-                ),
-                const SizedBox(height: 24),
+                validator: controller.validateHabitName,
+              ),
+              const SizedBox(height: 24),
 
-                // Habit Form
-                const HabitFormWidget(),
-              ],
-            ),
+              const Text(
+                'Tipo de Hábito',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              Obx(() => SegmentedButton<HabitType>(
+                segments: const [
+                  ButtonSegment(
+                    value: HabitType.binary,
+                    label: Text('Binário'),
+                    icon: Icon(Icons.check_circle_outline),
+                  ),
+                  ButtonSegment(
+                    value: HabitType.incremental,
+                    label: Text('Incremental'),
+                    icon: Icon(Icons.trending_up),
+                  ),
+                ],
+                selected: {controller.selectedType.value},
+                onSelectionChanged: (Set<HabitType> selection) {
+                  controller.setType(selection.first);
+                },
+              )),
+
+              const SizedBox(height: 24),
+              const Text(
+                'Frequência',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              Obx(() => SegmentedButton<HabitFrequency>(
+                segments: const [
+                  ButtonSegment(
+                    value: HabitFrequency.daily,
+                    label: Text('Diário'),
+                  ),
+                  ButtonSegment(
+                    value: HabitFrequency.weekly,
+                    label: Text('Semanal'),
+                  ),
+                ],
+                selected: {controller.selectedFrequency.value},
+                onSelectionChanged: (Set<HabitFrequency> selection) {
+                  controller.setFrequency(selection.first);
+                },
+              )),
+
+              const SizedBox(height: 24),
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      'Horário Recomendado (opcional)',
+                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                  Obx(() => TextButton.icon(
+                    icon: Icon(Icons.access_time),
+                    label: Text(
+                      controller.selectedTime.value == null
+                          ? 'Definir'
+                          : '${controller.selectedTime.value!.hour.toString().padLeft(2, '0')}:${controller.selectedTime.value!.minute.toString().padLeft(2, '0')}',
+                    ),
+                    onPressed: () => controller.setRecommendedTime(context),
+                  )),
+                ],
+              ),
+
+              Obx(() {
+                if (controller.selectedType.value == HabitType.incremental) {
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const SizedBox(height: 24),
+                      Row(
+                        children: [
+                          const Text(
+                            'Meta Diária',
+                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                          ),
+                          const Spacer(),
+                          IconButton(
+                            icon: const Icon(Icons.remove_circle_outline),
+                            onPressed: controller.targetValue.value <= 1
+                                ? null
+                                : () => controller.setTargetValue(controller.targetValue.value - 1),
+                            color: Colors.red[400],
+                          ),
+                          Obx(() => Text(
+                            controller.targetValue.value.toString(),
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          )),
+                          IconButton(
+                            icon: const Icon(Icons.add_circle_outline),
+                            onPressed: () => controller.setTargetValue(controller.targetValue.value + 1),
+                            color: Colors.green[400],
+                          ),
+                        ],
+                      ),
+                    ],
+                  );
+                }
+                return const SizedBox.shrink();
+              }),
+
+              const SizedBox(height: 32),
+              SizedBox(
+                width: double.infinity,
+                height: 48,
+                child: Obx(() => ElevatedButton(
+                  onPressed: controller.isLoading.value
+                      ? null
+                      : () async {
+                          if (await controller.addHabit()) {
+                            Get.back(); // Retorna para a tela de tracking após sucesso
+                          }
+                        },
+                  child: controller.isLoading.value
+                      ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                          ),
+                        )
+                      : const Text('Adicionar Hábito'),
+                )),
+              ),
+            ],
           ),
         ),
       ),

@@ -5,7 +5,7 @@ import 'package:get/get.dart';
 import './firebase_options.dart';
 import './presentation/bindings/auth_bindings.dart';
 import './presentation/bindings/habit_bindings.dart';
-import './presentation/pages/login_page.dart';
+import './presentation/routes/app_routes.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -37,8 +37,17 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
+        cardTheme: CardThemeData(
+          elevation: 2,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
       ),
-      home: LoginPage(controller: Get.find<AuthController>()),
+      initialRoute: AppRoutes.habits, // Alterado para habits como rota inicial
+      getPages: AppRoutes.routes,
+      initialBinding: AuthBindings(),
     );
   }
 }
+

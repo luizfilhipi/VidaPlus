@@ -33,3 +33,4 @@ class UpdateHabitUseCase {
     await _repository.updateHabit(habit);
   }
 }
+
