@@ -13,6 +13,7 @@ class AuthController extends GetxController {
 
   Future<void> login(String email, String password) async {
     try {
+      error.value = '';
       isLoading.value = true;
       user.value = await authRepository.login(email, password);
     } catch (e) {
@@ -24,12 +25,40 @@ class AuthController extends GetxController {
 
   Future<void> register(String email, String password) async {
     try {
+      error.value = '';
       isLoading.value = true;
       user.value = await authRepository.register(email, password);
     } catch (e) {
       error.value = 'Erro ao registrar';
     } finally {
       isLoading.value = false;
+    }
+  }
+
+  Future<void> logout() async {
+    try {
+      error.value = '';
+      isLoading.value = true;
+      await authRepository.logout();
+      user.value = null;
+    } catch (e) {
+      error.value = 'Erro ao fazer logout';
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  @override
+  void onInit() {
+    super.onInit();
+    _checkCurrentUser();
+  }
+
+  Future<void> _checkCurrentUser() async {
+    try {
+      user.value = await authRepository.getCurrentUser();
+    } catch (e) {
+      print('Error checking current user: $e');
     }
   }
 }
