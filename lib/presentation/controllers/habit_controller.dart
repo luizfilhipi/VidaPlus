@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:flutter_vidaplus/domain/entities/habit_entity.dart';
 import 'package:flutter_vidaplus/domain/usecases/habit_usecases.dart';
 import 'package:flutter_vidaplus/presentation/controllers/auth_controller.dart';
+import 'package:flutter_vidaplus/presentation/routes/app_routes.dart';
 
 class HabitController extends GetxController {
   final GetHabitsUseCase _getHabitsUseCase;
@@ -11,7 +12,12 @@ class HabitController extends GetxController {
   final AddHabitUseCase _addHabitUseCase;
   final AuthController _authController;
 
-  final nameController = TextEditingController();
+  TextEditingController? _nameController;
+  TextEditingController get nameController {
+    _nameController ??= TextEditingController();
+    return _nameController!;
+  }
+
   final formKey = GlobalKey<FormState>();
   
   final RxBool isLoading = false.obs;
@@ -51,8 +57,9 @@ class HabitController extends GetxController {
 
   @override
   void onClose() {
+    _nameController?.dispose();
+    _nameController = null;
     _habitsSubscription?.cancel();
-    nameController.dispose();
     super.onClose();
   }
 
@@ -138,7 +145,7 @@ class HabitController extends GetxController {
             TextButton(
               onPressed: () {
                 Get.back(); // Fecha o dialog
-                Get.back(); // Volta para a tela de tracking
+                Get.offAllNamed(AppRoutes.habits); // Navega diretamente para a página de hábitos
               },
               child: const Text('OK'),
             ),
@@ -253,5 +260,13 @@ class HabitController extends GetxController {
       return 'Nome do hábito deve ter pelo menos 3 caracteres';
     }
     return null;
+  }
+
+  void clearForm() {
+    _nameController?.text = '';
+    selectedFrequency.value = HabitFrequency.daily;
+    selectedType.value = HabitType.binary;
+    selectedTime.value = null;
+    targetValue.value = 1;
   }
 }

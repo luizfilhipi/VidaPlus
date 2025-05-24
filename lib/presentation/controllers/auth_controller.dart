@@ -70,14 +70,21 @@ class AuthController extends GetxController {
     }
   }
 
-  Future<void> logout() async {
+  Future<void> signOut() async {
     try {
-      error.value = '';
       isLoading.value = true;
-      await _authService.logout();
+      error.value = '';
+
+      // Primeiro limpa o estado do usuário
       user.value = null;
+
+      // Depois faz o signOut
+      await _authService.signOut();
+
+      // A navegação será feita automaticamente pelo listener do authStateChanges
     } catch (e) {
       error.value = 'Erro ao fazer logout';
+      print('Erro ao fazer logout: $e');
     } finally {
       isLoading.value = false;
     }

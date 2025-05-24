@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_vidaplus/presentation/controllers/habit_controller.dart';
-import 'package:flutter_vidaplus/presentation/widgets/habit_form_widget.dart';
 import '../../domain/entities/habit_entity.dart';
+import 'package:flutter_vidaplus/presentation/routes/app_routes.dart';
 
 class AddHabitPage extends GetView<HabitController> {
   const AddHabitPage({Key? key}) : super(key: key);
@@ -12,6 +12,13 @@ class AddHabitPage extends GetView<HabitController> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Adicionar Hábito'),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            controller.clearForm();
+            Get.back();
+          },
+        ),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
@@ -147,7 +154,8 @@ class AddHabitPage extends GetView<HabitController> {
                       ? null
                       : () async {
                           if (await controller.addHabit()) {
-                            Get.back(); // Retorna para a tela de tracking após sucesso
+                            controller.clearForm();
+                            Get.toNamed(AppRoutes.habits); // Retorna para a tela de tracking após sucesso
                           }
                         },
                   child: controller.isLoading.value
