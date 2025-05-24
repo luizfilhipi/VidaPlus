@@ -41,6 +41,24 @@ class HabitEntity extends Equatable {
     );
   }
 
+  bool isValid() {
+    if (name.isEmpty || name.length < 3) {
+      throw ValidationException('O nome do hábito deve ter pelo menos 3 caracteres');
+    }
+    
+    if (userId.isEmpty) {
+      throw ValidationException('ID do usuário é obrigatório');
+    }
+
+    return true;
+  }
+
+  // Extension method para formatação do horário recomendado
+  String get formattedRecommendedTime {
+    if (recommendedTime == null) return 'Sem horário definido';
+    return '${recommendedTime!.hour.toString().padLeft(2, '0')}:${recommendedTime!.minute.toString().padLeft(2, '0')}';
+  }
+
   // Equatable para comparação de objetos
   @override
   List<Object?> get props => [
@@ -51,4 +69,14 @@ class HabitEntity extends Equatable {
     recommendedTime,
     createdAt,
   ];
+}
+
+class ValidationException implements Exception {
+  final String message;
+  ValidationException(this.message);
+
+  @override
+  String toString() {
+    return 'ValidationException: $message';
+  }
 }
